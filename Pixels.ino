@@ -38,10 +38,8 @@ void pixelsDisplayTime(uint8_t HOUR, uint8_t MINUTE) {
   if (MINUTE >= 20) {
     HOUR = HOUR+1;
   }
-  
-  if (HOUR >= 12) {
-    HOUR = HOUR-12;
-  }
+
+  HOUR = HOUR % 12;
   
   if (HOUR == 0) {
     pixelsHourTwaalf(c);
