@@ -15,3 +15,10 @@ void setupWifi() {
   Serial.println(WiFi.localIP());
 }
 
+void loopWifi() {
+  if(WiFi.status() != WL_CONNECTED) {
+    WiFi.disconnect();
+    setupWifi();
+  }
+}
+

@@ -18,6 +18,7 @@ void setup() {
 }
 
 void loop() {
+  loopWifi();
   loopServer();
   if (inClockModus == true) {
     loopTimeDisplay(false);
