@@ -13,6 +13,8 @@ uint32_t c = pixels.Color(127,127,127);
 
 void pixelsSetup() {
   pixels.begin();
+  pixels.clear();
+  pixels.show();
 }
 
 void pixelsSetBrightness(int brightness) {
@@ -22,6 +24,12 @@ void pixelsSetBrightness(int brightness) {
     pixels.setBrightness(brightness);
     pixels.show();
   }
+}
+
+void printStatusPixel() {
+    pixels.setPixelColor(statusPixel, c);
+    pixels.show();
+    statusPixel++;
 }
 
 void pixelsSetColor(uint32_t colorR, uint32_t colorG, uint32_t colorB) {

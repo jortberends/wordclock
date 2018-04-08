@@ -3,13 +3,7 @@
 #include <DS1302RTC.h>
 
 // RTC: CE, IO, CLK 
-DS1302RTC RTC(16, 5, 4);
-
-/*
- *  1 = Central European Standard Time
- *  2 = Central European Summer Time
-*/
-const int TIMEZONE = 1; 
+DS1302RTC RTC(16, 5, 4); 
 
 // Local port to listen for UDP packets
 unsigned int NTP_LOCAL_PORT = 2390;
@@ -61,7 +55,9 @@ void readTimeAndSetRTC() {
 }
 
 unsigned long retrieveTime()
-{
+{ 
+  printStatusPixel();
+  
   unsigned long result;
   
   //get a random server from the pool
@@ -70,20 +66,19 @@ unsigned long retrieveTime()
   sendNTPpacket(NTP_SERVER_IP); // send an NTP packet to a time server
   // wait to see if a reply is available
   delay(1000);
-  
+
   int cb = udp.parsePacket();
-  if (!cb) {
-    Serial.println("no packet yet");
-  }
-  else {
+
+  if (cb) {
+    
     Serial.print("packet received, length=");
     Serial.println(cb);
     // We've received a packet, read the data from it
     udp.read(NTP_PACKET_BUFFER, NTP_PACKET_SIZE); // read the packet into the buffer
-
+  
     //the timestamp starts at byte 40 of the received packet and is four bytes,
     // or two words, long. First, esxtract the two words:
-
+  
     unsigned long highWord = word(NTP_PACKET_BUFFER[40], NTP_PACKET_BUFFER[41]);
     unsigned long lowWord = word(NTP_PACKET_BUFFER[42], NTP_PACKET_BUFFER[43]);
     // combine the four bytes (two words) into a long integer
@@ -91,7 +86,7 @@ unsigned long retrieveTime()
     unsigned long secsSince1900 = highWord << 16 | lowWord;
     Serial.print("Seconds since Jan 1 1900 = " );
     Serial.println(secsSince1900);
-
+  
     // now convert NTP time into everyday time:
     Serial.print("Unix time = ");
     // Unix time starts on Jan 1 1970. In seconds, that's 2208988800:
@@ -100,7 +95,7 @@ unsigned long retrieveTime()
     unsigned long epoch = secsSince1900 - seventyYears;
     // print Unix time:
     Serial.println(epoch);
-
+  
     // print the hour, minute and second:
     Serial.print("The UTC time is ");       // UTC is the time at Greenwich Meridian (GMT)
     Serial.print((epoch  % 86400L) / 3600); // print the hour (86400 equals secs per day)
@@ -116,7 +111,7 @@ unsigned long retrieveTime()
       Serial.print('0');
     }
     Serial.println(epoch % 60); // print the second
-
+  
     epoch = epoch + 60*60*TIMEZONE;
     // print the hour, minute and second:
     Serial.print("The UTC time is ");       // UTC is the time at Greenwich Meridian (GMT)
@@ -133,10 +128,14 @@ unsigned long retrieveTime()
       Serial.print('0');
     }
     Serial.println(epoch % 60); // print the second
-
+  
     result = epoch;
+  } else {
+    printStatusPixel();
+    delay(10000);
+    return retrieveTime();
   }
-  // wait ten seconds before asking for the time again
+ 
   return result;
 }
 
