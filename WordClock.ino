@@ -7,17 +7,27 @@
 
 bool inClockModus = true;
 
+/*
+ *  1 = Central European Standard Time
+ *  2 = Central European Summer Time
+*/
+const int TIMEZONE = 2;
+
+uint8_t statusPixel = 0;
+
 void setup() {
   Serial.begin(115200);
+  pixelsSetup();
   setupMacAddress();
   setupWifi();
   setupServer();
   setupTime();
-  pixelsSetup();
   pixelsFireSetup();
+  sunsetSunriseSetup();
 }
 
 void loop() {
+  statusPixel=0;
   loopWifi();
   loopServer();
   if (inClockModus == true) {
