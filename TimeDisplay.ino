@@ -12,6 +12,7 @@ void loopTimeDisplay(bool forced) {
     TD_PREV_MINUTE = TD_MINUTE;
 
     pixelsDisplayTime(TD_HOUR, TD_MINUTE);
+    sunsetSunriseLoop(TD_HOUR, TD_MINUTE);
   }
 }
 
