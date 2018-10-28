@@ -1,8 +1,6 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <WiFiUdp.h>
-#include <TimeLib.h>
-#include <DS1302RTC.h>
 #include <Adafruit_NeoPixel.h>
 
 bool inClockModus = true;
@@ -11,7 +9,7 @@ bool inClockModus = true;
  *  1 = Central European Standard Time
  *  2 = Central European Summer Time
 */
-const int TIMEZONE = 2;
+const int TIMEZONE = 1;
 
 uint8_t statusPixel = 0;
 

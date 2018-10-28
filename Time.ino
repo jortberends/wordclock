@@ -1,9 +1,10 @@
 #include <WiFiUdp.h>
+#include <Time.h>
 #include <TimeLib.h>
-#include <DS1302RTC.h>
+#include <DS1302.h>
 
 // RTC: CE, IO, CLK 
-DS1302RTC RTC(16, 5, 4); 
+DS1302 rtc(16, 5, 4);
 
 // Local port to listen for UDP packets
 unsigned int NTP_LOCAL_PORT = 2390;
@@ -32,26 +33,21 @@ void stopNTPServer() {
 }
 
 void setupRTC() {
-  if (RTC.haltRTC()) {
-    Serial.print("The DS1302 is stopped. Please set time");
-    Serial.println("to initialize the time and begin running.");
-  }
-  if (!RTC.writeEN()) {
-    Serial.println("The DS1302 is write protected. This normal.");
-  }
+  rtc.writeProtect(false);
+  rtc.halt(false);
 }
 
 void readTimeAndSetRTC() {
   time_t t = retrieveTime();
-
+  
   Serial.print("Time: ");
   Serial.println(t);
 
-  if (RTC.set(t) == 0) {
-    Serial.println("RTC is set.");
-  } else {
-    Serial.println("Failed to set RTC.");
-  }
+  Time rtcTime = Time(year(t), month(t), day(t), hour(t), minute(t), second(t), Time::kSunday);
+
+  rtc.time(rtcTime);
+
+  Serial.println("RTC is set");
 }
 
 unsigned long retrieveTime()
