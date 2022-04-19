@@ -1,6 +1,6 @@
 #include "ArduinoJson.h"
 
-WiFiClient httpClient;
+WiFiClientSecure httpsClient;
 
 uint8_t sunrise_hour = 0;
 uint8_t sunrise_minute = 0;
@@ -39,30 +39,31 @@ void sunsetSunriseSetup() {
 }
 
 void retrieveNewData() {
+  httpsClient.setInsecure();
   
-  if (!httpClient.connect(sunset_host, 80)) {
+  if (!httpsClient.connect(sunset_host, 443)) {
     Serial.println("Connection failed");
     return;
   }
   Serial.println("Connected");
 
   String url = "/json?lat=52.3082089&lng=4.8637064&date=today&formatted=0";
-  httpClient.print(String("GET ") + url + " HTTP/1.1\r\n" +
+  httpsClient.print(String("GET ") + url + " HTTP/1.1\r\n" +
                "Host: " + sunset_host + "\r\n" + 
                "Connection: close\r\n\r\n");
 
     unsigned long timeout = millis();
-  while (httpClient.available() == 0) {
+  while (httpsClient.available() == 0) {
     if (millis() - timeout > 5000) {
       Serial.println(">>> Client Timeout !");
-      httpClient.stop();
+      httpsClient.stop();
       return;
     }
   }
 
   // Check HTTP status
   char status[32] = {0};
-  httpClient.readBytesUntil('\r', status, sizeof(status));
+  httpsClient.readBytesUntil('\r', status, sizeof(status));
   if (strcmp(status, "HTTP/1.1 200 OK") != 0) {
     Serial.print("Unexpected response: ");
     Serial.println(status);
@@ -71,7 +72,7 @@ void retrieveNewData() {
 
   // Skip HTTP headers
   char endOfHeaders[] = "\r\n\r\n";
-  if (!httpClient.find(endOfHeaders)) {
+  if (!httpsClient.find(endOfHeaders)) {
     Serial.println("Invalid response");
     return;
   }
@@ -80,11 +81,11 @@ void retrieveNewData() {
   const size_t capacity = JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(10) + 490;
   DynamicJsonBuffer jsonBuffer(capacity);
 
-  String weirdStuff = httpClient.readStringUntil('\r');
+  String weirdStuff = httpsClient.readStringUntil('\r');
   //Serial.println(weirdStuff);
 
   // Parse JSON object
-  JsonObject& root = jsonBuffer.parseObject(httpClient);
+  JsonObject& root = jsonBuffer.parseObject(httpsClient);
   if (!root.success()) {
     Serial.println("Parsing failed!");
     return;
@@ -100,7 +101,16 @@ void retrieveNewData() {
   sunset_hour = ((results_sunset[11]-'0')*10)+(results_sunset[12]-'0')+TIMEZONE;
   sunset_minute = ((results_sunset[14]-'0')*10)+(results_sunset[15]-'0');
 
-  // Disconnect
-  httpClient.stop();
-}
+  Serial.print("Sunrise: ");
+  Serial.print(sunrise_hour);
+  Serial.print(":");
+  Serial.println(sunrise_minute);
+  
+  Serial.print("Sunset: ");
+  Serial.print(sunset_hour);
+  Serial.print(":");
+  Serial.println(sunset_minute);
 
+  // Disconnect
+  httpsClient.stop();
+}
