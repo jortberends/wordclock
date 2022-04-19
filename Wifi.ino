@@ -1,4 +1,5 @@
 #include <ESP8266WiFi.h>
+#include <ArduinoOTA.h>
 
 char ssid[] = "";
 char pass[] = "";
@@ -14,6 +15,9 @@ void setupWifi() {
   Serial.println("WiFi Connected");
   Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
+  
+  ArduinoOTA.setHostname("wordclock-oud");
+  ArduinoOTA.begin();
 }
 
 void loopWifi() {
@@ -21,5 +25,6 @@ void loopWifi() {
     WiFi.disconnect();
     setupWifi();
   }
+  
+  ArduinoOTA.handle();
 }
-
